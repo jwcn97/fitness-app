@@ -116,11 +116,30 @@
         }
 
         titleEl.textContent = `Pioneer Fitness Tracker ${data.quarterLabel}`;
-        displayEl.innerHTML = data.list
-          .map(item => `<div>${item._id}: 🏋️ x${item.count}</div>`).join("")
+        // Render each row with a button
+        displayEl.innerHTML = data.list.map(item => `
+          <div class="row" data-id="${item._id}">
+            <span>${item._id}: 🏋️ x${item.count}</span>
+            <button class="checkin-btn">Check In</button>
+          </div>
+        `).join('');
+
+        // Attach event listeners AFTER rendering
+        attachCheckInListeners(token);
       } catch {
         displayEl.textContent = "Failed to load display.";
       }
+    }
+
+    // ====== Attach event listeners to row buttons ======
+    function attachCheckInListeners(token) {
+      const buttons = document.querySelectorAll('.checkin-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const row = e.target.closest('.row');
+          await handleCheckIn(token, row.getAttribute('data-id'));
+        });
+      });
     }
 
     // ====== INIT ON LOAD ======
