@@ -76,12 +76,13 @@ app.post('/checkin', async (req, res) => {
     const token = auth.split(' ')[1];
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log('Processing for user:', decoded.username);
+      const username = req.body?.username ?? decoded.username;
+      console.log('Processing for user:', username);
 
       try {
-        const newCheckin = new Checkin({ username: decoded.username });
+        const newCheckin = new Checkin({ username });
         await newCheckin.save();
-        res.status(200).json({ success: true, data: decoded.username });
+        res.status(200).json({ success: true });
       } catch (err) {
         console.error(err);
         res.status(400).json({ error: 'Could not record your check-in. Please try again later.' });

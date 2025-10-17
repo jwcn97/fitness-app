@@ -34,91 +34,96 @@
 <body>
   <div class="container">
     <h2 id="title">Pioneer Fitness Tracker</h2>
-    <button id="process-btn">Check In</button>
+    <button id="checkin-btn">Check In</button>
     <div id="display">Loading display...</div>
   </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    const titleComp = document.getElementById("title");
-    const displayComp = document.getElementById("display");
-    const btn = document.getElementById("process-btn");
+    const titleEl = document.getElementById('title');
+    const displayEl = document.getElementById('display');
+    const checkinBtn = document.getElementById('checkin-btn');
 
+    // ====== MAIN APP INIT ======
     async function initTelegramApp() {
-      const tg = window.Telegram.WebApp;
+      const tg = window.Telegram?.WebApp;
+
       if (!tg?.initDataUnsafe) {
-        console.warn("Telegram not ready yet...");
-        setTimeout(initTelegramApp, 500);
-        return;
+        console.warn("Telegram WebApp not ready yet...");
+        return setTimeout(initTelegramApp, 500);
       }
-  
+
       tg.ready();
       tg.expand();
 
-      btn.addEventListener('click', async () => {
-        const token = localStorage.getItem('authToken');
-        const { success } = await fetch('/checkin', {
+      const token = await authenticateWithTelegram(tg.initData);
+      if (!token) return;
+
+      localStorage.setItem('authToken', token);
+      await updateDisplay(token);
+
+      checkinBtn.addEventListener('click', () => handleCheckIn(token));
+    }
+
+    // ====== AUTHENTICATION ======
+    async function authenticateWithTelegram(initData) {
+      try {
+        const res = await fetch('/auth/telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData })
+        });
+        const data = await res.json();
+        return data.token;
+      } catch (err) {
+        console.error("Auth failed:", err);
+        displayEl.textContent = "Authentication failed.";
+        return null;
+      }
+    }
+
+    // ====== CHECK-IN ACTION ======
+    async function handleCheckIn(token, username) {
+      try {
+        const res = await fetch('/checkin', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
-          }
-        })
-          .then(res => res.json())
-          .catch(() => ({}));
+          },
+          body: JSON.stringify({ username })
+        });
+        const { success } = await res.json();
+        if (success) await updateDisplay(token);
+        else displayEl.textContent = "Check-in failed.";
+      } catch {
+        displayEl.textContent = "Check-in error. Please try again.";
+      }
+    }
 
-        if (!success) {
-          return;
-        }
-  
-        const { data } = await fetch('/display', {
+    // ====== DISPLAY UPDATE ======
+    async function updateDisplay(token) {
+      try {
+        const res = await fetch('/display', {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-          .then(res => res.json())
-          .catch(() => ({}));
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const { data } = await res.json();
 
         if (!data) {
+          displayEl.textContent = "No data available.";
           return;
         }
 
-        titleComp.innerHTML = `Pioneer Fitness Tracker ${data.quarterLabel}`
-        displayComp.innerHTML = data.list.map((r) => `${r._id}: 🏋️ x ${r.count}`).join('<br>');
-      });
-
-      if (!tg.initData) {
-        return;
+        titleEl.textContent = `Pioneer Fitness Tracker ${data.quarterLabel}`;
+        displayEl.innerHTML = data.list
+          .map(item => `<div>${item._id}: 🏋️ x${item.count}</div>`).join("")
+      } catch {
+        displayEl.textContent = "Failed to load display.";
       }
-
-      const token = await fetch('/auth/telegram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ initData: tg.initData })
-      })
-      .then(res => res.json())
-      .then(({ token }) => token);
-
-      localStorage.setItem('authToken', token);
-
-      const { data } = await fetch('/display', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-      })
-          .then(res => res.json())
-          .catch(() => ({}));
-  
-      if (!data) {
-        return;
-      }
-
-      titleComp.innerHTML = `Pioneer Fitness Tracker ${data.quarterLabel}`
-      displayComp.innerHTML = data.list.map((r) => `${r._id}: 🏋️ x ${r.count}`).join('<br>');
     }
-  
+
+    // ====== INIT ON LOAD ======
     // Telegram Desktop sometimes injects WebApp object slightly late
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(initTelegramApp, 300);
