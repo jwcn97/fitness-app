@@ -109,8 +109,8 @@ app.get('/display', async (req, res) => {
         },
         {
             $group: {
-            _id: "$username",
-            count: { $sum: 1 },
+                _id: "$username",
+                count: { $sum: 1 },
             },
         },
         {
@@ -120,9 +120,10 @@ app.get('/display', async (req, res) => {
 
       res.status(200).json({
         success: true,
-        data: quarterLabel + '<br><br>' + results
-            .map((r) => `${r._id}: 🏋️ x${r.count}`)
-            .join("<br>") || 'no record yet'
+        data: {
+            quarterLabel,
+            list: results ?? [],
+        }
       });
     } catch (err) {
       res.status(403).json({ error: 'Invalid or expired token' });

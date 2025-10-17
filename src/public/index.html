@@ -33,13 +33,14 @@
 </head>
 <body>
   <div class="container">
-    <h1>Pioneer Fitness Tracker</h1>
+    <h2 id="title">Pioneer Fitness Tracker</h2>
     <button id="process-btn">Check In</button>
-    <p id="display">Loading display...</p>
+    <div id="display">Loading display...</div>
   </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
+    const titleComp = document.getElementById("title");
     const displayComp = document.getElementById("display");
     const btn = document.getElementById("process-btn");
 
@@ -62,8 +63,10 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           }
-        }).then(res => res.json());
-  
+        })
+          .then(res => res.json())
+          .catch(() => ({}));
+
         if (!success) {
           return;
         }
@@ -75,36 +78,45 @@
           }
         })
           .then(res => res.json())
-          .catch(err => ({}));
-  
-        displayComp.innerHTML = data ?? 'something went wrong';
+          .catch(() => ({}));
+
+        if (!data) {
+          return;
+        }
+
+        titleComp.innerHTML = `Pioneer Fitness Tracker ${data.quarterLabel}`
+        displayComp.innerHTML = data.list.map((r) => `${r._id}: 🏋️ x ${r.count}`).join('<br>');
       });
 
       if (!tg.initData) {
         return;
       }
 
-      await fetch('/auth/telegram', {
+      const token = await fetch('/auth/telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ initData: tg.initData })
       })
       .then(res => res.json())
-      .then(({ token }) => {
-        localStorage.setItem('authToken', token);
-      });
+      .then(({ token }) => token);
 
-      const token = localStorage.getItem('authToken');
+      localStorage.setItem('authToken', token);
+
       const { data } = await fetch('/display', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
       })
-        .then(res => res.json())
-        .catch(err => ({}));
+          .then(res => res.json())
+          .catch(() => ({}));
+  
+      if (!data) {
+        return;
+      }
 
-      displayComp.innerHTML = data ?? 'something went wrong';
+      titleComp.innerHTML = `Pioneer Fitness Tracker ${data.quarterLabel}`
+      displayComp.innerHTML = data.list.map((r) => `${r._id}: 🏋️ x ${r.count}`).join('<br>');
     }
   
     // Telegram Desktop sometimes injects WebApp object slightly late
