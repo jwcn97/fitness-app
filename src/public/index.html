@@ -34,7 +34,6 @@
 <body>
   <div class="container">
     <h2 id="title">Pioneer Fitness Tracker</h2>
-    <button id="checkin-btn">Check In</button>
     <div id="display">Loading display...</div>
   </div>
 
@@ -42,7 +41,6 @@
   <script>
     const titleEl = document.getElementById('title');
     const displayEl = document.getElementById('display');
-    const checkinBtn = document.getElementById('checkin-btn');
 
     // ====== MAIN APP INIT ======
     async function initTelegramApp() {
@@ -61,8 +59,6 @@
 
       localStorage.setItem('authToken', token);
       await updateDisplay(token);
-
-      checkinBtn.addEventListener('click', () => handleCheckIn(token));
     }
 
     // ====== AUTHENTICATION ======
