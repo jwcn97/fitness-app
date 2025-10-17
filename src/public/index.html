@@ -55,10 +55,12 @@
 
     // ====== CHECK-IN ACTION ======
     async function handleCheckIn(token, username, btn) {
-      // disable only this button
-      btn.disabled = true;
-      const originalText = btn.textContent;
-      btn.textContent = '⏳...';
+      if (btn) {
+        // disable only this button
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = '⏳...';
+      }
 
       try {
         const res = await fetch('/checkin', {
@@ -75,8 +77,10 @@
       } catch {
         displayEl.textContent = "Check-in error. Please try again.";
       } finally {
-        btn.disabled = false;
-        btn.textContent = originalText;
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
       }
     }
 
@@ -94,9 +98,18 @@
           return;
         }
 
+        const listToDisplay = [...data.list];
+
+        const tg = window.Telegram?.WebApp;
+        const username = tg?.initDataUnsafe?.user?.username;
+        if (username && (!data.list.length || !data.list.find(item => item._id === username))) {
+          // mock current user with 0 count
+          listToDisplay.push({ _id: username, count: 0 });
+        }
+
         titleEl.textContent = `Pioneer Fitness Tracker ${data.quarterLabel}`;
         // Render each row with a button
-        displayEl.innerHTML = data.list.map(item => `
+        displayEl.innerHTML = listToDisplay.map(item => `
           <div class="row" data-id="${item._id}">
             <span>${item._id}: 🏋️ x${item.count}</span>
             <button class="checkin-btn">Check In</button>
