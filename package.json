@@ -7,9 +7,10 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "lint": "eslint . --ext .ts",
         "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
-        "build": "tsc",
+        "build": "cp -r src/public dist/public && tsc",
         "typecheck": "tsc --noEmit --skipLibCheck",
         "start": "nodemon",
+        "serve": "node dist/index.js",
         "process:start": "pm2 start dist/index.js --max-memory-restart 300M",
         "process:stop": "pm2 stop index && pm2 delete index"
     },
