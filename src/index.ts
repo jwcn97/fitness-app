@@ -1,12 +1,14 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
+import Checkin from "./models/checkIn";
+import mongoose from 'mongoose';
 import express from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import path from 'path';
-// const express = require('express');
-// const path = require('path');
+import { getQuarterRange } from './utils';
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -24,13 +26,15 @@ app.get('/', (req, res) => {
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("✅ MongoDB connected"))
+    .catch((err) => console.error("❌ MongoDB connection error:", err));
+
 // Helper function to verify Telegram init data
 function verifyTelegramInitData(initData) {
   const parsed = Object.fromEntries(new URLSearchParams(initData));
   const hash = parsed.hash;
   delete parsed.hash;
-
-  console.log('TEST', parsed);
 
   const dataCheckString = Object.keys(parsed)
     .sort()
@@ -65,7 +69,7 @@ app.post('/auth/telegram', (req, res) => {
     res.json({ token });
 });
 
-app.post('/checkin', (req, res) => {
+app.post('/checkin', async (req, res) => {
     const auth = req.headers.authorization;
     if (!auth) return res.status(401).json({ error: 'Missing token' });
   
@@ -73,15 +77,56 @@ app.post('/checkin', (req, res) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       console.log('Processing for user:', decoded.username);
-      // do your processing logic here
-      res.json({ success: true, user: decoded.username });
+
+      try {
+        const newCheckin = new Checkin({ username: decoded.username });
+        await newCheckin.save();
+        res.status(200).json({ success: true, data: decoded.username });
+      } catch (err) {
+        console.error(err);
+        res.status(400).json({ error: 'Could not record your check-in. Please try again later.' });
+      }
     } catch (err) {
       res.status(403).json({ error: 'Invalid or expired token' });
     }
 })
 
-app.get('/display', (req, res) => {
-    res.json({ success: true });
+app.get('/display', async (req, res) => {
+    const auth = req.headers.authorization;
+    if (!auth) return res.status(401).json({ error: 'Missing token' });
+  
+    const token = auth.split(' ')[1];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('Display for user:', decoded.username);
+
+      const { start, end, quarterLabel } = getQuarterRange();
+      const results = await Checkin.aggregate([
+        {
+            $match: {
+                timestamp: { $gte: start, $lte: end },
+            },
+        },
+        {
+            $group: {
+            _id: "$username",
+            count: { $sum: 1 },
+            },
+        },
+        {
+            $sort: { count: -1 }, // optional: sort by count descending
+        },
+      ]);
+
+      res.status(200).json({
+        success: true,
+        data: quarterLabel + '<br><br>' + results
+            .map((r) => `${r._id}: 🏋️ x${r.count}`)
+            .join("<br>") || 'no record yet'
+      });
+    } catch (err) {
+      res.status(403).json({ error: 'Invalid or expired token' });
+    }
 })
 
 // Start the server
