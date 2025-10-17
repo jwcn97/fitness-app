@@ -54,7 +54,12 @@
     }
 
     // ====== CHECK-IN ACTION ======
-    async function handleCheckIn(token, username) {
+    async function handleCheckIn(token, username, btn) {
+      // disable only this button
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = '⏳...';
+
       try {
         const res = await fetch('/checkin', {
           method: 'POST',
@@ -69,6 +74,9 @@
         else displayEl.textContent = "Check-in failed.";
       } catch {
         displayEl.textContent = "Check-in error. Please try again.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
       }
     }
 
@@ -108,7 +116,7 @@
       buttons.forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const row = e.target.closest('.row');
-          await handleCheckIn(token, row.getAttribute('data-id'));
+          await handleCheckIn(token, row.getAttribute('data-id'), btn);
         });
       });
     }
