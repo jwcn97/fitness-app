@@ -106,7 +106,7 @@ app.get('/display', async (req, res) => {
     const token = auth.split(' ')[1];
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log('TEST', decoded.chatInstance);
+      console.log('TEST', decoded);
 
       const { start, end, quarterLabel } = getQuarterRange();
       const results = await Checkin.aggregate([
