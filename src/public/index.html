@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pioneer Fitness Tracker</title>
+  <title>Fitness Tracker</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h2 id="title">Pioneer Fitness Tracker</h2>
+    <h2 id="title">Fitness Tracker</h2>
     <div id="display">Loading display...</div>
   </div>
 
@@ -107,7 +107,7 @@
           listToDisplay.push({ _id: username, count: 0 });
         }
 
-        titleEl.textContent = `Pioneer Fitness Tracker ${data.quarterLabel}`;
+        titleEl.textContent = `Fitness Tracker ${data.quarterLabel}`;
         // Render each row with a button
         displayEl.innerHTML = listToDisplay.map(item => `
           <div class="row" data-id="${item._id}">

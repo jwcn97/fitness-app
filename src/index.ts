@@ -64,7 +64,15 @@ app.post('/auth/telegram', (req, res) => {
     }
 
     const user = JSON.parse(verified.user);
-    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        chatInstance: verified.chat_instance
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
   
     res.json({ token });
 });
@@ -77,10 +85,9 @@ app.post('/checkin', async (req, res) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const username = req.body?.username ?? decoded.username;
-      console.log('Processing for user:', username);
 
       try {
-        const newCheckin = new Checkin({ username });
+        const newCheckin = new Checkin({ username, chat_instance: decoded.chatInstance });
         await newCheckin.save();
         res.status(200).json({ success: true });
       } catch (err) {
@@ -99,13 +106,14 @@ app.get('/display', async (req, res) => {
     const token = auth.split(' ')[1];
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log('Display for user:', decoded.username);
+      console.log('TEST', decoded.chatInstance);
 
       const { start, end, quarterLabel } = getQuarterRange();
       const results = await Checkin.aggregate([
         {
             $match: {
-                timestamp: { $gte: start, $lte: end },
+              chat_instance: decoded.chatInstance,
+              timestamp: { $gte: start, $lte: end },
             },
         },
         {
