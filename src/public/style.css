@@ -56,7 +56,7 @@ body {
 
   /* ====== REFRESH BUTTON ====== */
   .refresh-btn {
-    display: inline-block;
+    display: none;            /* Hide at first */
     margin-bottom: 20px;
     background-color: #2196F3;
     border: none;

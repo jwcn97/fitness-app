@@ -31,10 +31,24 @@
       tg.ready();
       tg.expand();
 
+      const chatType = tg.initDataUnsafe.chat_type;
+      if (
+        !chatType ||
+        chatType === 'private' ||
+        chatType === 'sender'
+      ) {
+        displayEl.textContent = "Please open from a telegram group chat";
+        return;
+      }
+
       const token = await authenticateWithTelegram(tg.initData);
-      if (!token) return;
+      if (!token) {
+        displayEl.textContent = "Please open from a telegram group chat";
+        return;
+      };
 
       localStorage.setItem('authToken', token);
+      refreshBtn.style.display = 'inline-block'
       attachRefreshListener(token);
       await updateDisplay(token);
     }
