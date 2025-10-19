@@ -9,6 +9,7 @@
 <body>
   <div class="container">
     <h2 id="title">Fitness Tracker</h2>
+    <button id="refresh-btn" class="refresh-btn">🔄 Refresh</button>
     <div id="display">Loading display...</div>
   </div>
 
@@ -16,6 +17,7 @@
   <script>
     const titleEl = document.getElementById('title');
     const displayEl = document.getElementById('display');
+    const refreshBtn = document.getElementById('refresh-btn');
 
     // ====== MAIN APP INIT ======
     async function initTelegramApp() {
@@ -33,6 +35,7 @@
       if (!token) return;
 
       localStorage.setItem('authToken', token);
+      attachRefreshListener(token);
       await updateDisplay(token);
     }
 
@@ -103,8 +106,14 @@
         const tg = window.Telegram?.WebApp;
         const username = tg?.initDataUnsafe?.user?.username;
         if (username && (!data.list.length || !data.list.find(item => item._id === username))) {
+          // Find where to insert (alphabetical order)
+          let indexToInsert = data.list.findIndex(item => item._id.localeCompare(username) > 0);
+          if (indexToInsert === -1) {
+            indexToInsert = data.list.length;
+          }
+
           // mock current user with 0 count
-          listToDisplay.push({ _id: username, count: 0 });
+          listToDisplay.splice(indexToInsert, 0, { _id: username, count: 0 });
         }
 
         titleEl.textContent = `Fitness Tracker ${data.quarterLabel}`;
@@ -131,6 +140,26 @@
           const row = e.target.closest('.row');
           await handleCheckIn(token, row.getAttribute('data-id'), btn);
         });
+      });
+    }
+
+    // ====== REFRESH BUTTON ======
+    function attachRefreshListener(token) {
+      refreshBtn.addEventListener('click', async () => {
+        const allButtons = document.querySelectorAll('button'); // includes check-in + refresh
+        // Disable all buttons
+        allButtons.forEach(btn => btn.disabled = true);
+        refreshBtn.textContent = '⏳ Refreshing...';
+
+        try {
+          if (token) await updateDisplay(token);
+        } catch {
+          console.error('Refresh error:', err);
+        } finally {
+          // Re-enable all buttons
+          allButtons.forEach(btn => btn.disabled = false);
+          refreshBtn.textContent = '🔄 Refresh';
+        }
       });
     }
 
