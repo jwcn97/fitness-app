@@ -115,7 +115,7 @@ app.get('/display', async (req, res) => {
             },
         },
         {
-            $sort: { count: -1 }, // optional: sort by count descending
+            $sort: { _id: 1 }, // optional: sort by username
         },
       ]);
 
