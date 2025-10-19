@@ -89,10 +89,13 @@
           body: JSON.stringify({ username })
         });
         const { success } = await res.json();
-        if (success) await updateDisplay(token);
-        else displayEl.textContent = "Check-in failed.";
+        if (success) {
+          await updateDisplay(token);
+        } else {
+          alert("Check-in failed.");
+        }
       } catch {
-        displayEl.textContent = "Check-in error. Please try again.";
+        alert("Check-in error. Please try again.")
       } finally {
         if (btn) {
           btn.disabled = false;
