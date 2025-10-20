@@ -22,7 +22,6 @@
     const displayEl = document.getElementById('display');
     const selectEl = document.getElementById('quarter-select');
     const refreshBtn = document.getElementById('refresh-btn');
-    const controlsEl = document.querySelector('.controls');
 
     // ====== MAIN APP INIT ======
     async function initTelegramApp() {
@@ -53,7 +52,6 @@
       };
 
       localStorage.setItem('authToken', token);
-      controlsEl.style.display = 'flex';
       generateQuarters(token);
       attachRefreshListener(token);
     }
@@ -81,6 +79,7 @@
         }
       }
 
+      selectEl.style.opacity = 1;
       selectEl.value = `Q${currQuarter}-${currYear}`;
 
       async function handleSelectorValChange(selectedValue) {
@@ -207,6 +206,7 @@
 
     // ====== REFRESH BUTTON ======
     function attachRefreshListener(token) {
+      refreshBtn.style.display = 'inline-block';
       refreshBtn.addEventListener('click', async () => {
         const allButtons = document.querySelectorAll('button');
         allButtons.forEach(btn => btn.disabled = true);

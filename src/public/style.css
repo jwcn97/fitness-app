@@ -29,7 +29,7 @@ body {
   }
 
   .controls {
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
@@ -37,6 +37,7 @@ body {
   }
 
   .selector {
+    opacity: 0;
     padding: 8px 12px;
     border-radius: 8px;
     border: 1px solid #ccc;
@@ -80,7 +81,7 @@ body {
 
   /* ====== REFRESH BUTTON ====== */
   .refresh-btn {
-    /* display: none; */
+    display: none;
     margin-bottom: 20px;
     background-color: #2196F3;
     border: none;
