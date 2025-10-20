@@ -27,6 +27,27 @@ body {
   p {
     color: #555;
   }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .selector {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    font-size: 1em;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: background-color 0.2s ease;
+  }
   
   button {
     padding: 10px 20px;
@@ -38,6 +59,9 @@ body {
     font-size: 1em;
     cursor: pointer;
     transition: background-color 0.2s ease;
+  }
+  .checkin-btn {
+    margin-left: 10px;
   }
   
   button:hover {

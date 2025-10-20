@@ -9,7 +9,10 @@
 <body>
   <div class="container">
     <h2 id="title">Fitness Tracker</h2>
-    <button id="refresh-btn" class="refresh-btn">🔄 Refresh</button>
+    <div class="controls">
+      <select id="quarter-select" class="selector"></select>
+      <button id="refresh-btn" class="refresh-btn">🔄 Refresh</button>
+    </div>
     <div id="display">Loading display...</div>
   </div>
 
@@ -17,6 +20,7 @@
   <script>
     const titleEl = document.getElementById('title');
     const displayEl = document.getElementById('display');
+    const selectEl = document.getElementById('quarter-select');
     const refreshBtn = document.getElementById('refresh-btn');
 
     // ====== MAIN APP INIT ======
@@ -49,8 +53,56 @@
 
       localStorage.setItem('authToken', token);
       refreshBtn.style.display = 'inline-block'
+      generateQuarters(token);
       attachRefreshListener(token);
-      await updateDisplay(token);
+      // await updateDisplay(token);
+    }
+
+    function promiseWithDisableButton(prom) {
+
+    }
+
+    function generateQuarters(token) {
+      const startQuarter = 3;
+      const startYear = 2025;
+      const quarters = [];
+
+      const now = new Date();
+      const currYear = now.getFullYear();
+      const currQuarter = Math.floor(now.getMonth() / 3) + 1;
+      let year = currYear;
+      let quarter = currQuarter;
+
+      while (year > startYear || (year === startYear && quarter >= startQuarter)) {
+        const option = document.createElement('option');
+        option.value = `Q${quarter}-${year}`;
+        option.textContent = `Q${quarter}-${year}`;
+        selectEl.appendChild(option);
+        quarter--;
+        if (quarter < 1) {
+          quarter = 4;
+          year--;
+        }
+      }
+
+      selectEl.value = `Q${currQuarter}-${currYear}`;
+
+      async function handleSelectorValChange(selectedValue) {
+        // NOTE: cannot share the same const for button selectors because check in buttons will be re-rendered
+        document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        selectEl.disabled = true;
+        await updateDisplay(token, selectedValue);
+
+        const currYear = now.getFullYear();
+        const currQuarter = Math.floor(now.getMonth() / 3) + 1;
+        document.querySelectorAll('button').forEach(btn => btn.disabled = selectedValue !== `Q${currQuarter}-${currYear}`);
+        selectEl.disabled = false;
+      }
+
+      // Listen for user changes
+      selectEl.addEventListener('change', (e) => handleSelectorValChange(e.target.value));
+
+      handleSelectorValChange(selectEl.value);
     }
 
     // ====== AUTHENTICATION ======
@@ -90,7 +142,7 @@
         });
         const { success } = await res.json();
         if (success) {
-          await updateDisplay(token);
+          await updateDisplay(token, selectEl.value);
         } else {
           alert("Check-in failed.");
         }
@@ -105,9 +157,9 @@
     }
 
     // ====== DISPLAY UPDATE ======
-    async function updateDisplay(token) {
+    async function updateDisplay(token, quarter) {
       try {
-        const res = await fetch('/display', {
+        const res = await fetch(`/display?quarter=${quarter}`, {
           method: 'GET',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -122,22 +174,21 @@
 
         const tg = window.Telegram?.WebApp;
         const username = tg?.initDataUnsafe?.user?.username;
-        if (username && (!data.list.length || !data.list.find(item => item._id === username))) {
+        if (username && (!data.list.length || !data.list.find(item => item.username === username))) {
           // Find where to insert (alphabetical order)
-          let indexToInsert = data.list.findIndex(item => item._id.localeCompare(username) > 0);
+          let indexToInsert = data.list.findIndex(item => item.username.localeCompare(username) > 0);
           if (indexToInsert === -1) {
             indexToInsert = data.list.length;
           }
 
           // mock current user with 0 count
-          listToDisplay.splice(indexToInsert, 0, { _id: username, count: 0 });
+          listToDisplay.splice(indexToInsert, 0, { username: username, count: 0 });
         }
 
-        titleEl.textContent = `Fitness Tracker ${data.quarterLabel}`;
         // Render each row with a button
         displayEl.innerHTML = listToDisplay.map(item => `
-          <div class="row" data-id="${item._id}">
-            <span>${item._id}: 🏋️ x${item.count}</span>
+          <div class="row" data-id="${item.username}">
+            <span>${item.username}: 🏋️ x${item.count}</span>
             <button class="checkin-btn">Check In</button>
           </div>
         `).join('');
@@ -163,18 +214,19 @@
     // ====== REFRESH BUTTON ======
     function attachRefreshListener(token) {
       refreshBtn.addEventListener('click', async () => {
-        const allButtons = document.querySelectorAll('button'); // includes check-in + refresh
-        // Disable all buttons
+        const allButtons = document.querySelectorAll('button');
         allButtons.forEach(btn => btn.disabled = true);
+        selectEl.disabled = true;
         refreshBtn.textContent = '⏳ Refreshing...';
 
         try {
-          if (token) await updateDisplay(token);
+          if (token) await updateDisplay(token, selectEl.value);
         } catch {
           console.error('Refresh error:', err);
         } finally {
           // Re-enable all buttons
           allButtons.forEach(btn => btn.disabled = false);
+          selectEl.disabled = false;
           refreshBtn.textContent = '🔄 Refresh';
         }
       });

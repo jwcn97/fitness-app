@@ -27,8 +27,8 @@ app.get('/', (req, res) => {
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ MongoDB connected"))
-    .catch((err) => console.error("❌ MongoDB connection error:", err));
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Helper function to verify Telegram init data
 function verifyTelegramInitData(initData) {
@@ -56,86 +56,86 @@ function verifyTelegramInitData(initData) {
 
 // Route to handle Telegram init data
 app.post('/auth/telegram', (req, res) => {
-    const { initData } = req.body;
-    const verified = verifyTelegramInitData(initData);
-  
-    if (!verified) {
-      return res.status(403).json({ error: 'Invalid Telegram init data' });
-    }
+  const { initData } = req.body;
+  const verified = verifyTelegramInitData(initData);
 
-    const user = JSON.parse(verified.user);
-    const token = jwt.sign(
-      {
-        id: user.id,
-        username: user.username,
-        chatInstance: verified.chat_instance
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-  
-    res.json({ token });
+  if (!verified) {
+    return res.status(403).json({ error: 'Invalid Telegram init data' });
+  }
+
+  const user = JSON.parse(verified.user);
+  const token = jwt.sign(
+    {
+      id: user.id,
+      username: user.username,
+      chatInstance: verified.chat_instance
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+
+  res.json({ token });
 });
 
 app.post('/checkin', async (req, res) => {
-    const auth = req.headers.authorization;
-    if (!auth) return res.status(401).json({ error: 'Missing token' });
-  
-    const token = auth.split(' ')[1];
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const username = req.body?.username ?? decoded.username;
+  const auth = req.headers.authorization;
+  if (!auth) return res.status(401).json({ error: 'Missing token' });
 
-      try {
-        const newCheckin = new Checkin({ username, chat_instance: decoded.chatInstance });
-        await newCheckin.save();
-        res.status(200).json({ success: true });
-      } catch (err) {
-        console.error(err);
-        res.status(400).json({ error: 'Could not record your check-in. Please try again later.' });
-      }
+  const token = auth.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const username = req.body?.username ?? decoded.username;
+
+    try {
+      const newCheckin = new Checkin({ username, chat_instance: decoded.chatInstance });
+      await newCheckin.save();
+      res.status(200).json({ success: true });
     } catch (err) {
-      res.status(403).json({ error: 'Invalid or expired token' });
+      console.error(err);
+      res.status(400).json({ error: 'Could not record your check-in. Please try again later.' });
     }
+  } catch (err) {
+    res.status(403).json({ error: 'Invalid or expired token' });
+  }
 })
 
 app.get('/display', async (req, res) => {
-    const auth = req.headers.authorization;
-    if (!auth) return res.status(401).json({ error: 'Missing token' });
-  
-    const token = auth.split(' ')[1];
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const auth = req.headers.authorization;
+  if (!auth) return res.status(401).json({ error: 'Missing token' });
 
-      const { start, end, quarterLabel } = getQuarterRange();
-      const results = await Checkin.aggregate([
-        {
-            $match: {
-              chat_instance: decoded.chatInstance,
-              timestamp: { $gte: start, $lte: end },
-            },
-        },
-        {
-            $group: {
-                _id: "$username",
-                count: { $sum: 1 },
-            },
-        },
-        {
-            $sort: { _id: 1 }, // optional: sort by username
-        },
-      ]);
+  const token = auth.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      res.status(200).json({
-        success: true,
-        data: {
-            quarterLabel,
-            list: results ?? [],
-        }
-      });
-    } catch (err) {
-      res.status(403).json({ error: 'Invalid or expired token' });
-    }
+    const { start, end, quarterLabel } = getQuarterRange(req.query.quarter);
+    const results = await Checkin.aggregate([
+      {
+        $match: {
+          chat_instance: decoded.chatInstance,
+          timestamp: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $group: {
+          _id: "$username",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { _id: 1 }, // optional: sort by username
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        quarterLabel,
+        list: (results ?? []).map(r => ({ username: r._id, count: r.count })),
+      }
+    });
+  } catch (err) {
+    res.status(403).json({ error: 'Invalid or expired token' });
+  }
 })
 
 // Start the server
