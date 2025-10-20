@@ -80,7 +80,7 @@ body {
 
   /* ====== REFRESH BUTTON ====== */
   .refresh-btn {
-    display: inline-block;
+    /* display: none; */
     margin-bottom: 20px;
     background-color: #2196F3;
     border: none;
