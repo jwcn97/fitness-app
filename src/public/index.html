@@ -22,6 +22,7 @@
     const displayEl = document.getElementById('display');
     const selectEl = document.getElementById('quarter-select');
     const refreshBtn = document.getElementById('refresh-btn');
+    const controlsEl = document.querySelector('.controls');
 
     // ====== MAIN APP INIT ======
     async function initTelegramApp() {
@@ -52,14 +53,9 @@
       };
 
       localStorage.setItem('authToken', token);
-      refreshBtn.style.display = 'inline-block'
+      controlsEl.style.display = 'flex';
       generateQuarters(token);
       attachRefreshListener(token);
-      // await updateDisplay(token);
-    }
-
-    function promiseWithDisableButton(prom) {
-
     }
 
     function generateQuarters(token) {
@@ -92,9 +88,6 @@
         document.querySelectorAll('button').forEach(btn => btn.disabled = true);
         selectEl.disabled = true;
         await updateDisplay(token, selectedValue);
-
-        const currYear = now.getFullYear();
-        const currQuarter = Math.floor(now.getMonth() / 3) + 1;
         document.querySelectorAll('button').forEach(btn => btn.disabled = selectedValue !== `Q${currQuarter}-${currYear}`);
         selectEl.disabled = false;
       }
@@ -102,6 +95,7 @@
       // Listen for user changes
       selectEl.addEventListener('change', (e) => handleSelectorValChange(e.target.value));
 
+      // fire change for the first time
       handleSelectorValChange(selectEl.value);
     }
 

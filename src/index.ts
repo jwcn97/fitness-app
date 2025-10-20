@@ -107,7 +107,7 @@ app.get('/display', async (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const { start, end, quarterLabel } = getQuarterRange(req.query.quarter);
+    const { start, end } = getQuarterRange(req.query.quarter);
     const results = await Checkin.aggregate([
       {
         $match: {
@@ -129,7 +129,6 @@ app.get('/display', async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        quarterLabel,
         list: (results ?? []).map(r => ({ username: r._id, count: r.count })),
       }
     });

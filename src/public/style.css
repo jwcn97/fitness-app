@@ -29,7 +29,7 @@ body {
   }
 
   .controls {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     gap: 10px;
@@ -80,7 +80,7 @@ body {
 
   /* ====== REFRESH BUTTON ====== */
   .refresh-btn {
-    display: none;            /* Hide at first */
+    display: inline-block;            /* Hide at first */
     margin-bottom: 20px;
     background-color: #2196F3;
     border: none;

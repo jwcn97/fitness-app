@@ -13,13 +13,13 @@ export function getQuarterRange(quarter?: string) {
     } else {
       // Default to current quarter
       const now = new Date();
-      year = now.getUTCFullYear();
-      qNum = Math.floor(now.getUTCMonth() / 3) + 1;
+      year = now.getFullYear();
+      qNum = Math.floor(now.getMonth() / 3) + 1;
     }
   
     const startMonth = (qNum - 1) * 3;
     const start = new Date(Date.UTC(year, startMonth, 1, 0, 0, 0));
     const end = new Date(Date.UTC(year, startMonth + 3, 0, 23, 59, 59, 999));
   
-    return { start, end, quarterLabel: `Q${qNum}-${year}` };
+    return { start, end };
   }
