@@ -102,6 +102,30 @@ body {
     background-color: #9ecffb;
     cursor: not-allowed;
   }
+
+  .active-sg-btn {
+    display: none;
+    margin-bottom: 16px;
+    background-color: #e53935; /* ActiveSG red */
+    border: none;
+    border-radius: 6px;
+    color: white;
+    padding: 8px 14px; /* slightly smaller */
+    font-size: 0.9em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+  }
+
+  .active-sg-btn:hover {
+    background-color: #c62828; /* darker red on hover */
+    transform: scale(1.05);
+  }
+
+  .active-sg-btn:disabled {
+    background-color: #f19999;
+    cursor: not-allowed;
+  }
   
   /* ====== DISPLAY ROWS ====== */
   .row {

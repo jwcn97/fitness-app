@@ -9,6 +9,9 @@
 <body>
   <div class="container">
     <h2 id="title">Fitness Tracker</h2>
+    <a href="https://activesg.gov.sg/passes/activities/8JfPH6hlXBvlYJAqVzmPg" target="_blank" id="active-sg-btn" class="active-sg-btn">
+      Go to ActiveSG
+    </a>
     <div class="controls">
       <select id="quarter-select" class="selector"></select>
       <button id="refresh-btn" class="refresh-btn">🔄 Refresh</button>
@@ -20,6 +23,7 @@
   <script>
     const titleEl = document.getElementById('title');
     const displayEl = document.getElementById('display');
+    const activeSGBtn = document.getElementById('active-sg-btn');
     const selectEl = document.getElementById('quarter-select');
     const refreshBtn = document.getElementById('refresh-btn');
 
@@ -52,8 +56,13 @@
       };
 
       localStorage.setItem('authToken', token);
+      initActiveSGBtn();
       generateQuarters(token);
       attachRefreshListener(token);
+    }
+
+    function initActiveSGBtn() {
+      activeSGBtn.style.display = 'inline-block';
     }
 
     function generateQuarters(token) {
