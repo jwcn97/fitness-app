@@ -15,6 +15,10 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../client/build")));
 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
+});
+
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
 mongoose.connect(process.env.MONGO_URI)
