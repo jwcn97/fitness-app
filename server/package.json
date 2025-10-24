@@ -2,7 +2,7 @@
   "name": "fitness-tracker-app-server",
   "version": "1.0.0",
   "description": "Fitness Tracker App Server",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit --skipLibCheck",
