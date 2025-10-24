@@ -13,9 +13,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-// Tell Express to serve all static files (CSS, JS, images)
-// from the 'public' directory.
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "../client/build")));
 
 // Set up a route handler for the root URL ('/').
 // When a GET request is made to the root, respond by sending the
