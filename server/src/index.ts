@@ -15,8 +15,6 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../../client/build")));
 
-const BOT_TOKEN = process.env.BOT_TOKEN;
-
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
@@ -34,7 +32,7 @@ function verifyTelegramInitData(initData) {
 
   const secretKey = crypto
     .createHmac('sha256', 'WebAppData')
-    .update(BOT_TOKEN)
+    .update(process.env.BOT_TOKEN)
     .digest();
 
   const computedHash = crypto
@@ -78,8 +76,8 @@ app.post('/checkin', async (req, res) => {
     const username = req.body?.username ?? decoded.username;
 
     const now = new Date();
-    const startOfDay = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-    const endOfDay = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
     const existingCheckin = await Checkin.findOne({
       username,
@@ -124,6 +122,7 @@ app.get('/display', async (req, res) => {
         $group: {
           _id: "$username",
           count: { $sum: 1 },
+          sessions: { $push: "$timestamp" }, // 👈 collect all session timestamps
         },
       },
       {
@@ -132,9 +131,12 @@ app.get('/display', async (req, res) => {
     ]);
 
     res.status(200).json({
-      success: true,
       data: {
-        list: (results ?? []).map(r => ({ username: r._id, count: r.count })),
+        list: (results ?? []).map(r => ({
+          username: r._id,
+          count: r.count,
+          sessions: r.sessions,
+        })),
       }
     });
   } catch (err) {

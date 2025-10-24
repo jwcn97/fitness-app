@@ -18,8 +18,8 @@ export function getQuarterRange(quarter?: string) {
   }
 
   const startMonth = (qNum - 1) * 3;
-  const start = new Date(Date.UTC(year, startMonth, 1, 0, 0, 0));
-  const end = new Date(Date.UTC(year, startMonth + 3, 0, 23, 59, 59, 999));
+  const start = new Date(year, startMonth, 1, 0, 0, 0);
+  const end = new Date(year, startMonth + 3, 0, 23, 59, 59, 999);
 
   return { start, end };
 }

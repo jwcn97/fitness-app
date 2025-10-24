@@ -44,7 +44,7 @@ function App() {
       if (username && !list.find((i) => i.username === username)) {
         let indexToInsert = list.findIndex((i) => i.username.localeCompare(username) > 0);
         if (indexToInsert === -1) indexToInsert = list.length;
-        list.splice(indexToInsert, 0, { username, count: 0 });
+        list.splice(indexToInsert, 0, { username, count: 0, sessions: [] });
       }
 
       setDisplayData(list);
