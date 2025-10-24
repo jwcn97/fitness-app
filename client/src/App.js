@@ -68,11 +68,8 @@ function App() {
     setLoading(true);
 
     const btn = btnEl || document.querySelector(`[data-id='${username}'] button`);
-    let originalText;
     if (btn) {
       btn.disabled = true;
-      originalText = btn.textContent;
-      btn.textContent = "⏳...";
     }
 
     try {
@@ -84,11 +81,11 @@ function App() {
         },
         body: JSON.stringify({ username }),
       });
-      const { success } = await res.json();
-      if (success) {
-        await updateDisplay();
+      const { error } = await res.json();
+      if (error) {
+        alert(error);
       } else {
-        alert("Check-in failed.");
+        await updateDisplay();
       }
     } catch (err) {
       console.error("Check-in error", err);
@@ -97,7 +94,6 @@ function App() {
 
     if (btn) {
       btn.disabled = false;
-      btn.textContent = originalText || "Check In";
     }
 
     setLoading(false);
