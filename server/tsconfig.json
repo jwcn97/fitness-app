@@ -3,7 +3,7 @@
     "esModuleInterop": true,
     "module": "CommonJS",
     "moduleResolution": "node",
-    "baseUrl": "./",
+    "baseUrl": "src",
     "target": "es6",
     "outDir": "dist"
   }
