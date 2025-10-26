@@ -2,11 +2,14 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { useEffect, useState } from "react";
-import { getRandomColor } from "../utils";
+import { getQuarterDateRange, getRandomColor } from "../utils";
 
-function CalendarComponent({ displayData, onClose }) {
+function CalendarComponent({ selectedQuarter, displayData, onClose }) {
   const [userColors, setUserColors] = useState({});
   const [dateSessions, setDateSessions] = useState({});
+
+  const { minDate, maxDate } = getQuarterDateRange(selectedQuarter);
+  const [activeDate, setActiveDate] = useState(maxDate);
 
   useEffect(() => {
     const colorMap = {};
@@ -36,8 +39,10 @@ function CalendarComponent({ displayData, onClose }) {
         onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
       >
         <Calendar
-          minDate={new Date("2025-07-01")}
-          maxDate={new Date(Date.now())}
+          minDate={minDate}
+          maxDate={maxDate}
+          activeStartDate={activeDate}
+          onActiveStartDateChange={({ activeStartDate }) => setActiveDate(activeStartDate)}
           tileContent={({ date }) => {
             const dateStr = new Date(Date.UTC(
               date.getFullYear(),

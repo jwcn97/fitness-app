@@ -87,6 +87,7 @@ function App() {
         <button
           className="view-calendar-btn"
           onClick={() => setShowCalendar(true)}
+          disabled={loading}
         >
           📅 View Sessions
         </button>
@@ -94,6 +95,7 @@ function App() {
 
       {authToken && showCalendar ? (
         <Calendar
+          selectedQuarter={selectedQuarter}
           displayData={displayData}
           onClose={() => setShowCalendar(false)}
         />

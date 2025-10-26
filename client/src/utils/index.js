@@ -1,3 +1,41 @@
+export function getQuarterDateRange(quarterString) {
+  const [q, yearStr] = quarterString.split("-");
+  const year = parseInt(yearStr, 10);
+  const quarter = q.toUpperCase();
+
+  // Determine start month (0-indexed)
+  let startMonth;
+  switch (quarter) {
+    case "Q1": startMonth = 0; break;   // Jan
+    case "Q2": startMonth = 3; break;   // Apr
+    case "Q3": startMonth = 6; break;   // Jul
+    case "Q4": startMonth = 9; break;   // Oct
+    default: throw new Error(`Invalid quarter string: ${quarterString}`);
+  }
+
+  // Start = first day of quarter (local)
+  const minDate = new Date(year, startMonth, 1);
+  // End = last day of quarter (local)
+  const maxDate = new Date(year, startMonth + 3, 0);
+
+  // Check if current quarter
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentQuarter = Math.floor(now.getMonth() / 3) + 1;
+  const selectedQuarter = parseInt(quarter[1], 10);
+
+  let finalMaxDate = maxDate;
+  let activeDate = maxDate;
+
+  if (year === currentYear && selectedQuarter === currentQuarter) {
+    // Current quarter → cap at today
+    finalMaxDate = new Date();
+    activeDate = new Date(); // start at today
+  }
+
+  return { minDate, maxDate: finalMaxDate, activeDate };
+}
+
 export const getCurrentQuarter = () => {
   const now = new Date();
   const currYear = now.getFullYear();
