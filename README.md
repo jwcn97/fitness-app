@@ -2,7 +2,8 @@
 
 _a comprehensive guide to setup your own fitness bot to track fitness session counts with your friends!_
 
-<img src="./Screenshot.png" alt="screenshot" width="300"/>
+<img src="./Screenshot1.png" alt="screenshot1" width="300"/>
+<img src="./Screenshot2.png" alt="screenshot2" width="300"/>
 
 ## Development
 
