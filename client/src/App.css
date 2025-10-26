@@ -88,11 +88,6 @@ button:disabled,
   transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-.refresh-btn:hover {
-  background-color: #1976D2;
-  transform: scale(1.03);
-}
-
 .refresh-btn:disabled {
   background-color: #9ecffb;
   cursor: not-allowed;
