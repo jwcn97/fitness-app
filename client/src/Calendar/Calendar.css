@@ -1,0 +1,121 @@
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--tg-theme-bg-color, #fff);
+  color: var(--tg-theme-text-color, #222);
+  border-radius: 16px;
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.2s ease;
+}
+
+.react-calendar {
+  background: var(--tg-theme-bg-color, #fff);
+  color: var(--tg-theme-text-color, #000);
+  border: none;
+  width: 100%;
+}
+
+/* Month name + navigation arrows */
+.react-calendar__navigation button {
+  color: var(--tg-theme-text-color, #000);
+  background: transparent;
+  border: none;
+}
+
+/* Weekday labels */
+.react-calendar__month-view__weekdays {
+  color: var(--tg-theme-hint-color, #777);
+}
+
+/* Individual days */
+.react-calendar__tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* day number stays at top */
+  align-items: center;
+  height: 55px;                /* fixed total tile height */
+  padding: 6px 0;
+  line-height: 1.1;
+  box-sizing: border-box;
+  color: var(--tg-theme-text-color, #000);
+  background: transparent;
+}
+
+/* Style for the container that holds dots */
+.react-calendar__tile .dot-container {
+  margin-top: 4px;
+  height: 10px;                /* reserve space even when empty */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Today highlight */
+.react-calendar__tile--now {
+  background: rgba(33, 150, 243, 0.15) !important;
+}
+
+.legend {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column; /* 👈 stack vertically */
+  align-items: flex-start; /* 👈 left align text & dots */
+  gap: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9em;
+  color: var(--tg-theme-text-color, #000);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Disable hover & active backgrounds for all tiles */
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus,
+.react-calendar__tile--active,
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background: none !important;
+  color: inherit !important;
+  cursor: default !important;
+}
+
+/* Always highlight today */
+.react-calendar__tile--now {
+  background: rgba(33, 150, 243, 0.15) !important;
+  color: inherit !important;
+}
+
+/* ✅ Prevent hover from changing today's tile */
+.react-calendar__tile--now:hover,
+.react-calendar__tile--now:focus,
+.react-calendar__tile--now.react-calendar__tile--active:hover,
+.react-calendar__tile--now.react-calendar__tile--active:focus {
+  background: rgba(33, 150, 243, 0.15) !important; /* keep same color */
+  color: inherit !important;
+  cursor: default !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

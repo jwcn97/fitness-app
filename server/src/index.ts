@@ -92,7 +92,7 @@ app.post('/checkin', async (req, res) => {
     try {
       const newCheckin = new Checkin({ username, chat_instance: decoded.chatInstance });
       await newCheckin.save();
-      res.status(200).json({ success: true });
+      res.status(200).json({});
     } catch (err) {
       console.error(err);
       res.status(400).json({ error: 'Could not record your check-in. Please try again later.' });
@@ -135,7 +135,9 @@ app.get('/display', async (req, res) => {
         list: (results ?? []).map(r => ({
           username: r._id,
           count: r.count,
-          sessions: r.sessions,
+          sessions: r.sessions.map(ts =>
+            new Date(ts).toISOString().split("T")[0]
+          ),
         })),
       }
     });

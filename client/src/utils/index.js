@@ -24,6 +24,14 @@ export const getCurrentQuarter = () => {
   };
 }
 
+export const getRandomColor = () => {
+  const colors = [
+    "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF",
+    "#FF9F40", "#C9CBCF", "#00C49F", "#FF6666", "#B39DDB"
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
 export const authenticateWithTelegram = async (initData) => {
   try {
     const res = await fetch("/auth/telegram", {

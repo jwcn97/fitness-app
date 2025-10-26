@@ -1,4 +1,3 @@
-// src/useTelegram.js
 import { useEffect, useState } from "react";
 
 /**

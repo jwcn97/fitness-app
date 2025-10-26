@@ -136,3 +136,14 @@ button:disabled,
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
+
+.view-calendar-btn {
+  margin-top: 15px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.9em;
+  cursor: pointer;
+}
