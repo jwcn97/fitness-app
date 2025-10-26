@@ -62,13 +62,28 @@ export const getCurrentQuarter = () => {
   };
 }
 
-export const getRandomColor = () => {
-  const colors = [
-    "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF",
-    "#FF9F40", "#C9CBCF", "#00C49F", "#FF6666", "#B39DDB"
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-}
+export const distinctColors = [
+  "#E6194B", // vivid red
+  "#3CB44B", // green
+  "#FFE119", // yellow
+  "#4363D8", // blue
+  "#F58231", // orange
+  "#911EB4", // purple
+  "#46F0F0", // cyan
+  "#F032E6", // magenta
+  "#BCF60C", // lime
+  "#FABEBE", // pink
+  "#008080", // teal
+  "#E6BEFF", // lavender
+  "#9A6324", // brown
+  "#FFFAC8", // cream
+  "#800000", // maroon
+  "#AAFFC3", // mint
+  "#808000", // olive
+  "#FFD8B1", // peach
+  "#000075", // navy
+  "#808080", // gray
+];
 
 export const authenticateWithTelegram = async (initData) => {
   try {

@@ -2,7 +2,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { useEffect, useState } from "react";
-import { getQuarterDateRange, getRandomColor } from "../utils";
+import { getQuarterDateRange, distinctColors } from "../utils";
 
 function CalendarComponent({ selectedQuarter, displayData, onClose }) {
   const [userColors, setUserColors] = useState({});
@@ -15,9 +15,8 @@ function CalendarComponent({ selectedQuarter, displayData, onClose }) {
     const colorMap = {};
     const dateMap = {};
 
-    displayData.forEach((user) => {
-      // assign color
-      colorMap[user.username] = colorMap[user.username] || getRandomColor();
+    displayData.forEach((user, index) => {
+      colorMap[user.username] = distinctColors[index % distinctColors.length];
 
       // assign sessions
       user.sessions.forEach((dateStr) => {
