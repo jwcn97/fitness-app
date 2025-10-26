@@ -17,8 +17,7 @@ function CalendarComponent({ displayData, onClose }) {
       colorMap[user.username] = colorMap[user.username] || getRandomColor();
 
       // assign sessions
-      user.sessions.forEach((s) => {
-        const dateStr = new Date(s).toISOString().split("T")[0];
+      user.sessions.forEach((dateStr) => {
         if (!dateMap[dateStr]) dateMap[dateStr] = [];
         if (!dateMap[dateStr].includes(user.username)) {
           dateMap[dateStr].push(user.username);
@@ -37,8 +36,15 @@ function CalendarComponent({ displayData, onClose }) {
         onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
       >
         <Calendar
+          minDate={new Date("2025-07-01")}
+          maxDate={new Date(Date.now())}
           tileContent={({ date }) => {
-            const dateStr = date.toISOString().split("T")[0];
+            const dateStr = new Date(Date.UTC(
+              date.getFullYear(),
+              date.getMonth(),
+              date.getDate()
+            )).toISOString().split("T")[0];
+
             const users = dateSessions[dateStr];
             if (!users) return null;
 
