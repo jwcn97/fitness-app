@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
+import TelegramBot from 'node-telegram-bot-api';
 import Checkin from "./models/checkIn";
 import mongoose from 'mongoose';
 import express from 'express';
@@ -11,9 +12,16 @@ import { getQuarterRange } from './utils';
 
 const app = express();
 const port = process.env.PORT || 3000;
+const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../../client/build")));
+
+// TODO: handle this gracefully next time
+const CHAT_INSTANCE_TO_ID_MAPPING = {
+  '4798111195169560826': '-1002991106195', // test chat
+  '-6337278077197389445': '-4646201086', // real chat
+}
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
@@ -92,6 +100,12 @@ app.post('/checkin', async (req, res) => {
     try {
       const newCheckin = new Checkin({ username, chat_instance: decoded.chatInstance });
       await newCheckin.save();
+
+      const chatId = CHAT_INSTANCE_TO_ID_MAPPING[decoded.chatInstance];
+      if (chatId) {
+        bot.sendMessage(chatId, `🏋️ ${username} checked in!`);
+      }
+
       res.status(200).json({});
     } catch (err) {
       console.error(err);

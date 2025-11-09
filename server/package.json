@@ -18,9 +18,11 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.1",
+    "node-telegram-bot-api": "^0.66.0",
     "pm2": "^5.4.2"
   },
   "devDependencies": {
+    "@types/node-telegram-bot-api": "^0.64.12",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.7.0",
