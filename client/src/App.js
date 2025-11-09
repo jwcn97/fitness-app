@@ -75,7 +75,15 @@ function App() {
                   {item.username}: 🏋️ x{item.count}
                 </span>
                 <div className="last-checked-in">
-                  <em>Last checked in: {item.sessions.length ? item.sessions[item.sessions.length-1] : '—'}</em>
+                  <em>
+                    Last checked in: {item.timestamp.length
+                      ? new Date(item.timestamp[item.timestamp.length-1]).toLocaleDateString(undefined, {
+                        year: '2-digit',
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                      : '—'}
+                  </em>
                 </div>
               </div>
               <button

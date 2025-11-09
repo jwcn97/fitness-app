@@ -19,7 +19,8 @@ function CalendarComponent({ selectedQuarter, displayData, onClose }) {
       colorMap[user.username] = distinctColors[index % distinctColors.length];
 
       // assign sessions
-      user.sessions.forEach((dateStr) => {
+      user.timestamp.forEach((ts) => {
+        const dateStr = new Date(ts).toLocaleDateString();
         if (!dateMap[dateStr]) dateMap[dateStr] = [];
         if (!dateMap[dateStr].includes(user.username)) {
           dateMap[dateStr].push(user.username);
@@ -43,13 +44,7 @@ function CalendarComponent({ selectedQuarter, displayData, onClose }) {
           activeStartDate={activeDate}
           onActiveStartDateChange={({ activeStartDate }) => setActiveDate(activeStartDate)}
           tileContent={({ date }) => {
-            const dateStr = new Date(Date.UTC(
-              date.getFullYear(),
-              date.getMonth(),
-              date.getDate()
-            )).toISOString().split("T")[0];
-
-            const users = dateSessions[dateStr];
+            const users = dateSessions[date.toLocaleDateString()];
             if (!users) return null;
 
             return (

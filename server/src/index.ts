@@ -106,13 +106,11 @@ app.post('/checkin', async (req, res) => {
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
-    const existingCheckin = await Checkin.findOne({
-      username,
-      chat_instance: decoded.chatInstance,
-      timestamp: { $gte: startOfDay, $lt: endOfDay },
-    });
-
-    if (existingCheckin) {
+    if (
+      req.body.lastCheckIn &&
+      new Date(req.body.lastCheckIn) >= startOfDay &&
+      new Date(req.body.lastCheckIn) <= endOfDay
+    ) {
       return res.status(400).json({ error: "⚠️ Already checked in today!" });
     }
 
@@ -155,7 +153,7 @@ app.get('/display', async (req, res) => {
         $group: {
           _id: "$username",
           count: { $sum: 1 },
-          sessions: { $push: "$timestamp" }, // 👈 collect all session timestamps
+          timestamp: { $push: "$timestamp" }, // 👈 collect all session timestamps
         },
       },
       {
@@ -168,9 +166,7 @@ app.get('/display', async (req, res) => {
         list: (results ?? []).map(r => ({
           username: r._id,
           count: r.count,
-          sessions: r.sessions.map(ts =>
-            new Date(ts).toISOString().split("T")[0]
-          ),
+          timestamp: r.timestamp,
         })),
       }
     });

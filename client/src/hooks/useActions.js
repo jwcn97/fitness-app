@@ -94,7 +94,7 @@ function useActions() {
     if (username && !list.find((i) => i.username === username)) {
       let indexToInsert = list.findIndex((i) => i.username.localeCompare(username) > 0);
       if (indexToInsert === -1) indexToInsert = list.length;
-      list.splice(indexToInsert, 0, { username, count: 0, sessions: [] });
+      list.splice(indexToInsert, 0, { username, count: 0, timestamp: [] });
     }
 
     setDisplayData(list);
@@ -116,6 +116,8 @@ function useActions() {
       btn.disabled = true;
     }
 
+    const userTimestamps = displayData.find(u => u.username === username)?.timestamp;
+
     const res = await fetch("/checkin", {
       method: "POST",
       headers: {
@@ -125,6 +127,7 @@ function useActions() {
       body: JSON.stringify({
         username,
         chatId: tg?.initDataUnsafe.start_param,
+        lastCheckIn: userTimestamps?.length ? userTimestamps[userTimestamps.length - 1] : undefined,
       }),
     });
     const { error } = await res.json();
