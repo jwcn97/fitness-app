@@ -70,9 +70,14 @@ function App() {
         ) : (
           displayData.map((item) => (
             <div className="row" key={item.username} data-id={item.username}>
-              <span>
-                {item.username}: 🏋️ x{item.count}
-              </span>
+              <div className="user-info">
+                <span className="username">
+                  {item.username}: 🏋️ x{item.count}
+                </span>
+                <div className="last-checked-in">
+                  <em>Last checked in: {item.sessions.length ? item.sessions[item.sessions.length-1] : '—'}</em>
+                </div>
+              </div>
               <button
                 className="checkin-btn"
                 onClick={(e) => handleCheckIn(item.username, e.currentTarget)}
