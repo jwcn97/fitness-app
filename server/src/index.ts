@@ -122,7 +122,7 @@ app.post('/checkin', async (req, res) => {
 
       const chatId = req.body?.chatId ?? '';
       if (chatId) {
-        bot.sendMessage(chatId, `🏋️ ${username} checked in!`);
+        bot.sendMessage(chatId, `🏋️ @${username} checked in!`);
       }
 
       res.status(200).json({});
