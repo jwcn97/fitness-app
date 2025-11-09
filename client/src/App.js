@@ -26,14 +26,16 @@ function App() {
     <div className="container">
       <h2>Fitness Tracker</h2>
 
-      <a
-        href="https://activesg.gov.sg/passes/activities/8JfPH6hlXBvlYJAqVzmPg"
-        target="_blank"
-        rel="noreferrer"
+      <button
         className="active-sg-btn"
+        onClick={() => {
+          window.Telegram?.WebApp?.openLink(
+            "https://activesg.gov.sg/passes/activities/8JfPH6hlXBvlYJAqVzmPg"
+          );
+        }}
       >
         Get ActiveSG Gym Pass
-      </a>
+      </button>
 
       {authToken ? (
         <div className="controls">

@@ -70,16 +70,8 @@ button:disabled {
 }
 
 .active-sg-btn {
-  display: inline-block;
   margin-bottom: 10px;
   background-color: #e53935; /* ActiveSG red */
-  border: none;
-  border-radius: 6px;
-  color: white;
-  padding: 8px 14px; /* slightly smaller */
-  font-size: 0.9em;
-  cursor: pointer;
-  text-decoration: none;
   transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
