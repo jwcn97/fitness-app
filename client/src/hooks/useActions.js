@@ -44,6 +44,13 @@ function useActions() {
       return;
     }
 
+    if (!tg.initDataUnsafe.start_param) {
+      setMessage("Please open from bot /link command in a group")
+      setLoading(false);
+      authenticatingRef.current = false;
+      return;
+    }
+
     // Authenticate using Telegram initData (server will validate signature)
     const token = await authenticateWithTelegram(tg.initData);
     if (!token) {
@@ -115,7 +122,10 @@ function useActions() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken}`,
       },
-      body: JSON.stringify({ username }),
+      body: JSON.stringify({
+        username,
+        chatId: tg?.initDataUnsafe.start_param,
+      }),
     });
     const { error } = await res.json();
     if (error) {

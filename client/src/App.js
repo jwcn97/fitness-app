@@ -59,7 +59,7 @@ function App() {
             onClick={handleRefresh}
             disabled={loading || !canCheckInForCurrentQuarter}
           >
-            🔄 Refresh
+            ↻
           </button>
         </div>
       ) : null}

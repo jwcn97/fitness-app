@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import TelegramBot from 'node-telegram-bot-api';
+import { Message } from 'node-telegram-bot-api';
 import Checkin from "./models/checkIn";
 import mongoose from 'mongoose';
 import express from 'express';
@@ -14,14 +15,32 @@ const app = express();
 const port = process.env.PORT || 3000;
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
+bot.getMe().then((me) => {
+  const linkRegex = new RegExp(`^\\/link@${me.username}$`, 'i');
+  const appName = 'tracker'; // TODO: make app name dynamic
+
+  bot.onText(linkRegex, (msg: Message) => {
+    if (msg.chat.type == 'private') {
+      return;
+    }
+
+    bot.sendMessage(msg.chat.id, 'Open Web App', {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: 'Open',
+              url: `https://t.me/${me.username}/${appName}?startapp=${msg.chat.id}`,
+            },
+          ]
+        ]
+      }
+    });
+  });
+});
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../../client/build")));
-
-// TODO: handle this gracefully next time
-const CHAT_INSTANCE_TO_ID_MAPPING = {
-  '4798111195169560826': '-1002991106195', // test chat
-  '-6337278077197389445': '-4646201086', // real chat
-}
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
@@ -101,7 +120,7 @@ app.post('/checkin', async (req, res) => {
       const newCheckin = new Checkin({ username, chat_instance: decoded.chatInstance });
       await newCheckin.save();
 
-      const chatId = CHAT_INSTANCE_TO_ID_MAPPING[decoded.chatInstance];
+      const chatId = req.body?.chatId ?? '';
       if (chatId) {
         bot.sendMessage(chatId, `🏋️ ${username} checked in!`);
       }

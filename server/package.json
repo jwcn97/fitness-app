@@ -4,7 +4,7 @@
   "description": "Fitness Tracker App Server",
   "main": "src/index.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --skipLibCheck",
     "typecheck": "tsc --noEmit --skipLibCheck",
     "start": "nodemon",
     "process:start": "pm2 start dist/index.js --max-memory-restart 300M",
