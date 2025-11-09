@@ -116,8 +116,6 @@ function useActions() {
       btn.disabled = true;
     }
 
-    const userTimestamps = displayData.find(u => u.username === username)?.timestamp;
-
     const res = await fetch("/checkin", {
       method: "POST",
       headers: {
@@ -127,7 +125,6 @@ function useActions() {
       body: JSON.stringify({
         username,
         chatId: tg?.initDataUnsafe.start_param,
-        lastCheckIn: userTimestamps?.length ? userTimestamps[userTimestamps.length - 1] : undefined,
       }),
     });
     const { error } = await res.json();

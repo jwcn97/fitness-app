@@ -102,15 +102,20 @@ app.post('/checkin', async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const username = req.body?.username ?? decoded.username;
 
-    const now = new Date();
+    const now = new Date;
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
-    if (
-      req.body.lastCheckIn &&
-      new Date(req.body.lastCheckIn) >= startOfDay &&
-      new Date(req.body.lastCheckIn) <= endOfDay
-    ) {
+    const existingCheckin = await Checkin.findOne({
+      username,
+      chat_instance: decoded.chatInstance,
+      timestamp: {
+        $gte: new Date(startOfDay.getTime()), // convert to UTC
+        $lt: new Date(endOfDay.getTime()), // convert to UTC
+      },
+    });
+
+    if (existingCheckin) {
       return res.status(400).json({ error: "⚠️ Already checked in today!" });
     }
 
