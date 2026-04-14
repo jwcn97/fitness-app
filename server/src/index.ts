@@ -9,11 +9,107 @@ import express from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import path from 'path';
+import cron from 'node-cron';
 import { getQuarterRange } from './utils';
 
 const app = express();
 const port = process.env.PORT || 3000;
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+let monthlyReportInFlight = false;
+
+function getPreviousMonthRange(now = new Date()) {
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  return {
+    start: previousMonthStart,
+    end: monthStart,
+  };
+}
+
+function formatMonthlySummaryMessage(monthDate: Date, counts: { username: string; count: number }[]) {
+  const monthLabel = monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  if (!counts.length) {
+    return `📊 Monthly check-in summary (${monthLabel})\n\nNo check-ins were recorded this month.`;
+  }
+
+  const lines = counts.map(({ username, count }, i) => `${i + 1}. @${username} — ${count}`);
+  return `📊 Monthly check-in summary (${monthLabel})\n\n${lines.join('\n')}`;
+}
+
+async function runMonthlyGroupSummary() {
+  if (monthlyReportInFlight) {
+    return;
+  }
+
+  monthlyReportInFlight = true;
+  try {
+    const now = new Date();
+    const { start, end } = getPreviousMonthRange(now);
+
+    const [groupChats, groupedCounts] = await Promise.all([
+      Checkin.aggregate([
+        { $sort: { timestamp: 1 } },
+        {
+          $group: {
+            _id: '$chat_instance',
+            chatId: { $last: '$chat_id' },
+          },
+        },
+        {
+          $match: {
+            _id: { $ne: null },
+            chatId: { $nin: [null, ''] },
+          },
+        },
+      ]),
+      Checkin.aggregate([
+        {
+          $match: {
+            timestamp: { $gte: start, $lt: end },
+            chat_instance: { $ne: null },
+          },
+        },
+        {
+          $group: {
+            _id: { chat_instance: '$chat_instance', username: '$username' },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { '_id.username': 1 } },
+      ]),
+    ]);
+
+    const countsByChatInstance = new Map<string, { username: string; count: number }[]>();
+    for (const item of groupedCounts) {
+      const chatInstance = item?._id?.chat_instance;
+      const username = item?._id?.username;
+      if (!chatInstance || !username) continue;
+
+      const existing = countsByChatInstance.get(chatInstance) ?? [];
+      existing.push({ username, count: item.count });
+      countsByChatInstance.set(chatInstance, existing);
+    }
+
+    for (const group of groupChats) {
+      const chatInstance = group?._id;
+      const chatId = group?.chatId;
+      if (!chatInstance || !chatId) continue;
+
+      const monthlyCounts = countsByChatInstance.get(chatInstance) ?? [];
+      const message = formatMonthlySummaryMessage(start, monthlyCounts);
+
+      try {
+        await bot.sendMessage(chatId, message);
+      } catch (err) {
+        console.error(`Failed to send monthly summary to chat ${chatId}`, err);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to run monthly summary job', err);
+  } finally {
+    monthlyReportInFlight = false;
+  }
+}
 
 bot.getMe().then((me) => {
   const linkRegex = new RegExp(`^\\/link@${me.username}$`, 'i');
@@ -43,7 +139,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "../../client/build")));
 
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
+  .then(() => {
+    console.log("✅ MongoDB connected");
+    cron.schedule('0 0 1 * *', runMonthlyGroupSummary);
+  })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Helper function to verify Telegram init data
@@ -120,10 +219,16 @@ app.post('/checkin', async (req, res) => {
     }
 
     try {
-      const newCheckin = new Checkin({ username, chat_instance: decoded.chatInstance });
+      const chatId = req.body?.chatId ?? '';
+      const chatIdString = chatId ? String(chatId) : undefined;
+
+      const newCheckin = new Checkin({
+        username,
+        chat_instance: decoded.chatInstance,
+        chat_id: chatIdString,
+      });
       await newCheckin.save();
 
-      const chatId = req.body?.chatId ?? '';
       if (chatId) {
         bot.sendMessage(chatId, `🏋️ @${username} checked in!`);
       }
