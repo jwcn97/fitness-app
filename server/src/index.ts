@@ -141,7 +141,7 @@ app.use(express.static(path.join(__dirname, "../../client/build")));
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB connected");
-    cron.schedule('0 0 1 * *', runMonthlyGroupSummary);
+    cron.schedule('0 0 1 * *', runMonthlyGroupSummary, { timezone: 'Asia/Singapore' });
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
