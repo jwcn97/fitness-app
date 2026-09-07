@@ -23,3 +23,12 @@ export function getQuarterRange(quarter?: string) {
 
   return { start, end };
 }
+
+export function getPreviousMonthRange(now = new Date()) {
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  return {
+    start: previousMonthStart,
+    end: monthStart,
+  };
+}
